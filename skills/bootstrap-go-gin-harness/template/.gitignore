@@ -1,0 +1,52 @@
+# Secrets / env
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets/
+
+# Go build artifacts
+bin/
+dist/
+*.exe
+*.test
+*.out
+*.prof
+*.pprof
+*.trace
+coverage.out
+coverage.html
+cover.out
+cover.html
+
+# Module cache (managed by Go; never commit)
+vendor/
+
+# IDE / OS
+.vscode/
+.idea/
+*.swp
+*~
+.DS_Store
+Thumbs.db
+
+# Tool caches
+.air/
+.tmp/
+tmp/
+
+# sqlc (generated code is committed; cache is not)
+.sqlc/
+
+# golangci-lint
+.golangci-cache/
+
+# testcontainers (Docker leftovers occasionally written into cwd)
+.testcontainers/
+
+# Per-user Claude Code settings (each contributor owns their own)
+.claude/settings.local.json
+
+# OS log junk
+*.log

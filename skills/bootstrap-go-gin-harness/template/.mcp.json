@@ -1,0 +1,4 @@
+{
+  "$comment": "MCP servers wired for the harness. The Go toolchain (gopls, go vet, gofumpt) is invoked via native shell — no MCP needed. Add MCP servers here for resources your skills/agents query: a Postgres MCP for query-postgres, an OTLP MCP for query-telemetry, a Microsoft Learn / first-party docs MCP, etc. Each entry is opt-in: add as adopted.",
+  "mcpServers": {}
+}

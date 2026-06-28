@@ -1,0 +1,20 @@
+# Per-user Claude Code settings — never commit
+.claude/settings.local.json
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+
+# Backup files from editors
+*.bak
+*.orig
+
+# Logs
+*.log
+
+golang-plugin/.github/workflows/architect-review.yml

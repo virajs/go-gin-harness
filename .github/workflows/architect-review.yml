@@ -1,0 +1,100 @@
+## Architect-review CI workflow — SKETCH (verify against current Claude Code CI integration before enabling)
+##
+## What this would do (when the upstream tooling supports it):
+## - On every PR, invoke `claude /architect-review` against the PR diff.
+## - The architect-review workflow runs parallel reviewers (architect-backend +
+##   security-auditor-backend) and adversarially verifies each finding.
+## - PR is blocked if a 'critical' finding survives verification.
+##
+## Status: This file is a TEMPLATE. The exact CLI invocation, Claude Code GitHub
+## Action, and result-parsing approach depends on the Anthropic-published GitHub
+## Action. Update once that's stable.
+
+name: architect-review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: [main]
+
+jobs:
+  architect-review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      pull-requests: write   # to post review comments
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0      # need full history for diff base
+
+      # --- Placeholder: install Claude Code CLI ---
+      # The actual install method depends on Anthropic's released distribution.
+      # As of this template's writing, options include:
+      #   - A published GitHub Action (e.g. anthropics/setup-claude-code@v1)
+      #   - npm install -g (if Claude Code ships via npm)
+      #   - A curl-installed binary
+      # Pick the one that matches the current Claude Code release.
+      - name: Install Claude Code
+        run: |
+          echo "TODO: install Claude Code CLI per current Anthropic documentation"
+          # Example placeholder:
+          # npm install -g @anthropic-ai/claude-code
+          # OR
+          # curl -fsSL https://claude.com/install.sh | sh
+
+      - name: Install plugin
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          claude plugin marketplace add https://github.com/virajs/go-gin-harness
+          claude plugin install go-gin-harness@go-gin-harness
+
+      - name: Architect-review the PR diff
+        id: review
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          # The exact invocation depends on Claude Code's headless mode.
+          # Sketch:
+          claude --permission-mode acceptEdits \
+            /architect-review backend security \
+            --diff-base origin/${{ github.base_ref }} \
+            --output review.json
+
+      - name: Block on critical findings
+        run: |
+          # Fail the workflow if any verified-real finding has severity=critical.
+          # Parsing depends on the review output shape; sketch:
+          if jq -e '.real[] | select(.finding.severity=="critical")' review.json > /dev/null 2>&1; then
+            echo "::error::Critical architect-review findings detected; blocking merge."
+            jq -r '.real[] | select(.finding.severity=="critical") | "\(.finding.file):\(.finding.line) — \(.finding.title)"' review.json
+            exit 1
+          fi
+          echo "✓ No critical findings; review surfaced $(jq '.real | length' review.json) non-critical items."
+
+      - name: Comment on PR
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const review = JSON.parse(fs.readFileSync('review.json', 'utf8'));
+            const body = [
+              '## architect-review summary',
+              '',
+              `**Total findings**: ${review.allFindings?.length ?? 0}`,
+              `**Verified REAL**: ${review.real?.length ?? 0}`,
+              `**Dismissed as NOISE**: ${review.noise?.length ?? 0}`,
+              '',
+              review.summary ?? '',
+            ].join('\n');
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body,
+            });

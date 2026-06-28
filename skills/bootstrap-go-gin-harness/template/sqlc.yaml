@@ -1,0 +1,51 @@
+# sqlc — generates type-safe Go from SQL.
+# Docs: https://docs.sqlc.dev/en/stable/reference/config.html
+#
+# Workflow: write SQL in internal/infra/persistence/<feature>/queries/*.sql, run `make sqlc`,
+# the generated typed Go lands in internal/infra/persistence/<feature>/sqlc/*.sql.go (gitignored
+# from linting but committed to the repo).
+
+version: "2"
+
+sql:
+  - engine: postgresql
+    queries: internal/infra/persistence
+    schema: migrations
+    gen:
+      go:
+        package: sqlc
+        out: internal/infra/persistence/_sqlcgen
+        sql_package: pgx/v5
+        emit_interface: true
+        emit_json_tags: false
+        emit_db_tags: false
+        emit_prepared_queries: false
+        emit_exact_table_names: false
+        emit_empty_slices: true
+        emit_pointers_for_null_types: true
+        emit_methods_with_db_argument: false
+        emit_enum_valid_method: true
+        emit_all_enum_values: true
+        json_tags_id_uppercase: false
+        omit_unused_structs: true
+        output_batch_file_name: batch.go
+        output_db_file_name: db.go
+        output_models_file_name: models.go
+        output_querier_file_name: querier.go
+
+        # Map PostgreSQL types to Go types we control. Add overrides for domain types
+        # (e.g. tenant_id as a typed UUID newtype) once the schema stabilizes.
+        overrides:
+          - db_type: "uuid"
+            go_type:
+              import: "github.com/google/uuid"
+              type: "UUID"
+          - db_type: "timestamptz"
+            go_type:
+              import: "time"
+              type: "Time"
+          - db_type: "jsonb"
+            go_type: "[]byte"
+
+# After running `make sqlc`, write thin repository wrappers around the generated
+# *Queries methods. The generated code stays internal to internal/infra/persistence/.
