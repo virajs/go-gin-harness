@@ -8,10 +8,6 @@
   },
   "license": "MIT",
   "homepage": "https://github.com/virajs/go-gin-harness",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/virajs/go-gin-harness.git"
-  },
   "bugs": {
     "url": "https://github.com/virajs/go-gin-harness/issues"
   },
