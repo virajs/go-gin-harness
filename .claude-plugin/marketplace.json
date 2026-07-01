@@ -8,7 +8,7 @@
   },
   "metadata": {
     "description": "Single-plugin marketplace shipping the go-gin-harness plugin.",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "homepage": "https://github.com/virajs/go-gin-harness",
     "repository": "https://github.com/virajs/go-gin-harness"
   },
@@ -17,7 +17,7 @@
       "name": "go-gin-harness",
       "source": ".",
       "description": "Multi-agent harness for Go / Gin HTTP APIs — pgx + sqlc, log/slog, OpenTelemetry, testcontainers, strict golangci-lint, race detector + govulncheck gates, bundled with a bootstrap skill that scaffolds the per-repo governance.",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "category": "backend",
       "keywords": [
         "go",

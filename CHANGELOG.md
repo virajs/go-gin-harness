@@ -6,6 +6,16 @@ All notable changes to this plugin are documented here. Format follows
 
 ## [Unreleased]
 
+## [0.2.0] — 2026-07-01
+
+### Added
+
+- **`/gen-launch-json` slash command** — generates a VS Code `.vscode/launch.json` for
+  debugging the project with Delve: one `launch`/`debug` config per `cmd/` entrypoint,
+  plus debug-current-file, debug-package-tests, and attach-to-process. Detects
+  entrypoints and `.env` from the real repo layout and merges into an existing
+  `launch.json` rather than clobbering it.
+
 ## [0.1.0] — 2026-06-29
 
 Initial public release.
