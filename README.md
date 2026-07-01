@@ -403,6 +403,7 @@ work."
 | `/record-adr "<title>"` | Record an Architecture Decision Record (ADR) for a non-plan / cross-cutting / mid-flight decision under `docs/decisions/` |
 | `/run-evals <suite>` | Fire an LLM eval suite against the current build (if the product uses LLMs) |
 | `/docs-standards-sync` | Detect drift between governance docs and the actual code |
+| `/gen-launch-json` | Generate `.vscode/launch.json` for debugging the project with Delve (one config per `cmd/` entrypoint, plus debug-test / attach) |
 
 ## What ships system-wide vs. per-repo
 
@@ -412,7 +413,7 @@ work."
 ├── README.md                              (this file)
 ├── agents/                                (10 .md — system-wide)
 ├── workflows/                             (5 .js — system-wide)
-├── commands/                              (8 slash commands — system-wide)
+├── commands/                              (9 slash commands — system-wide)
 └── skills/
     ├── bootstrap-go-gin-harness/
     │   ├── SKILL.md
