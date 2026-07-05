@@ -6,6 +6,17 @@ All notable changes to this plugin are documented here. Format follows
 
 ## [Unreleased]
 
+## [0.3.0] — 2026-07-05
+
+### Added
+
+- **`/refresh-claude-md` slash command** — on-demand refresh of the repo's CLAUDE.md
+  against the actual code: regenerates the derived sections (status banner, "Where things
+  live" tree, build gates, doc-pointer links) from ground truth, preserves the
+  human-authored "Ways of working" governance and product vision, flags dead links, and
+  asks before rewriting or dropping any governance rule / design non-negotiable. Supports
+  `--dry-run` (propose-only, like `docs-standards-sync`).
+
 ## [0.2.0] — 2026-07-01
 
 ### Added

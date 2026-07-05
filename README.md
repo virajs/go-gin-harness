@@ -404,6 +404,7 @@ work."
 | `/run-evals <suite>` | Fire an LLM eval suite against the current build (if the product uses LLMs) |
 | `/docs-standards-sync` | Detect drift between governance docs and the actual code |
 | `/gen-launch-json` | Generate `.vscode/launch.json` for debugging the project with Delve (one config per `cmd/` entrypoint, plus debug-test / attach) |
+| `/refresh-claude-md` | Refresh CLAUDE.md against the actual code — regenerate the derived sections (status banner, dir tree, build gates, doc links), preserve governance/vision, ask before changing any rule |
 
 ## What ships system-wide vs. per-repo
 
@@ -413,7 +414,7 @@ work."
 ├── README.md                              (this file)
 ├── agents/                                (10 .md — system-wide)
 ├── workflows/                             (5 .js — system-wide)
-├── commands/                              (9 slash commands — system-wide)
+├── commands/                              (10 slash commands — system-wide)
 └── skills/
     ├── bootstrap-go-gin-harness/
     │   ├── SKILL.md
