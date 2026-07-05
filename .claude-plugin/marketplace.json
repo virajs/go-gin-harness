@@ -3,12 +3,12 @@
   "name": "go-gin-harness",
   "owner": {
     "name": "Viraj S",
-    "email": "viraj@xap.com.au",
+    "email": "viraj2005@gmail.com",
     "url": "https://github.com/virajs"
   },
   "metadata": {
     "description": "Single-plugin marketplace shipping the go-gin-harness plugin.",
-    "version": "0.3.0",
+    "version": "0.4.0",
     "homepage": "https://github.com/virajs/go-gin-harness",
     "repository": "https://github.com/virajs/go-gin-harness"
   },
@@ -17,7 +17,7 @@
       "name": "go-gin-harness",
       "source": ".",
       "description": "Multi-agent harness for Go / Gin HTTP APIs — pgx + sqlc, log/slog, OpenTelemetry, testcontainers, strict golangci-lint, race detector + govulncheck gates, bundled with a bootstrap skill that scaffolds the per-repo governance.",
-      "version": "0.3.0",
+      "version": "0.4.0",
       "category": "backend",
       "keywords": [
         "go",

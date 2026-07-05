@@ -431,7 +431,7 @@ work."
     │       ├── README.md
     │       ├── .claude/
     │       │   ├── settings.json
-    │       │   ├── hooks/                 (protect-commands, enforce-formatting, session-start-context)
+    │       │   ├── hooks/                 (protect-commands, enforce-formatting, session-start-context, claude-md-maintenance)
     │       │   └── rules/                 (go-conventions + 6 + backend/{7})
     │       ├── docs/                      (product-overview + projectStandards + README pointers)
     │       ├── scripts/check-coverage.sh

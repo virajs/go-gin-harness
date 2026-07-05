@@ -51,8 +51,19 @@ Procedure:
 
 5. **`--dry-run`** (if `$ARGUMENTS` contains it): do steps 1–4 as **propose-only** — output the
    diff/summary and stop without editing. Mirrors `docs-standards-sync`'s propose-only stance.
+   Skip step 6 (don't re-baseline the fingerprint on a dry run).
 
-6. **Report**:
+6. **Re-baseline the drift fingerprint** (only after CLAUDE.md was actually written). The
+   `claude-md-maintenance.sh` SessionStart hook nudges when tracked inputs drift from a stored
+   fingerprint; refreshing CLAUDE.md must update that baseline so the nudge clears. If the hook
+   exists (bootstrapped repos), run:
+   ```bash
+   bash "${CLAUDE_PROJECT_DIR:-.}/.claude/hooks/claude-md-maintenance.sh" --update-fingerprint
+   ```
+   Commit the updated `.claude/hooks/context/.claude-md.fingerprint` alongside the CLAUDE.md
+   change so teammates stop getting nudged too. If the hook isn't present, skip this silently.
+
+7. **Report**:
    - Sections refreshed (with before→after for banners/numbers).
    - Dead links found + how each was resolved.
    - Any governance/non-negotiable change that needs the owner's decision (left unapplied,

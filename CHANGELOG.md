@@ -6,6 +6,21 @@ All notable changes to this plugin are documented here. Format follows
 
 ## [Unreleased]
 
+## [0.4.0] — 2026-07-06
+
+### Added
+
+- **Automated CLAUDE.md maintenance pipeline** (bootstrap template) — a new per-repo
+  `SessionStart` hook, `.claude/hooks/claude-md-maintenance.sh`, fingerprints the repo
+  state that CLAUDE.md's derived sections are generated from (directory layout,
+  `.golangci.yml`, `Makefile`, `docs/projectStandards/`, `.claude/rules/`, `go.mod`
+  module, tenancy signal). When any tracked input drifts from the committed baseline
+  (`.claude/hooks/context/.claude-md.fingerprint`), it injects a passive `additionalContext`
+  nudge to run `/refresh-claude-md`. The hook detects; the `/refresh-claude-md` command
+  regenerates CLAUDE.md and re-baselines the fingerprint (`--update-fingerprint`), clearing
+  the nudge. Fails open; wired into `template/.claude/settings.json` alongside the existing
+  session-start context hook.
+
 ## [0.3.0] — 2026-07-05
 
 ### Added
