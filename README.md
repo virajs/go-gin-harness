@@ -254,6 +254,59 @@ as a preflight, pushes the branch.
 | LLM feature change (if applicable) | `/run-evals <suite>` |
 | About to push | `/push` (runs `make ci` preflight + checks branch state + asks confirmation) |
 
+### Working on several things at once — isolated dev environments
+
+Each feature/bug/improvement can get its own **git worktree + isolated runtime** — a separate
+branch, a dedicated Docker Postgres, unique ports, and a generated `.env` — so parallel work
+never collides on the working dir, the database, or `:8080`. Driven by the `dev-worktree`
+skill / `/worktree` command (backed by the bootstrapped `scripts/worktree.sh`).
+
+**Spin one up** (in a bootstrapped repo, with Docker running):
+
+```bash
+cd ~/code/orders-api
+/worktree new add-projects              # or: bash scripts/worktree.sh new add-projects
+#   → ../orders-api-worktrees/add-projects, branch feat/add-projects
+#   → index 0 → API :8080  PG :55432  OTEL :44317
+#   → Postgres up + healthy, migrations applied, .env written
+cd ../orders-api-worktrees/add-projects
+make run                                # binds :8080, uses its own DB — reads PORT + DATABASE_URL from .env
+```
+
+**Add a second in parallel** — ports auto-offset, no collision:
+
+```bash
+/worktree new fix-tax --type bugfix     # branch fix/fix-tax, index 1 → API :8081  PG :55433
+/worktree ls                            # list active worktrees + their ports
+```
+
+| `--type` | Branch prefix |
+|---|---|
+| `feature` (default) | `feat/` |
+| `bugfix` | `fix/` |
+| `improvement` | `chore/` |
+
+**Tear one down** when done (commit/push first):
+
+```bash
+/worktree rm fix-tax --delete-branch    # docker compose down -v (drops the data volume) + removes the worktree + frees the port index
+```
+
+`rm` **refuses** a dirty worktree or an unmerged branch unless you pass `--yes` — it surfaces
+what would be lost and lets you decide. Use `/worktree doctor` for a read-only report of drift
+(a hand-deleted worktree, a stale lock, an orphaned volume), each with the fix command.
+
+**Plan straight into isolation:** `/exec-plan "add projects" --isolate` provisions the worktree
+first, then writes the plan onto that branch's `docs/exec-plans/`.
+
+Notes:
+- Requires Docker (for the per-worktree Postgres). `cmd/api` must read `PORT` + `DATABASE_URL`
+  from the environment — the harness's config contract (see `.claude/rules/gin-conventions.md`
+  in a bootstrapped repo). Integration tests are unaffected (they use testcontainers).
+- **Runtime-aware:** in a repo without `compose.dev.yaml` (e.g. this plugin repo, or a
+  not-yet-bootstrapped clone), `/worktree new` still creates the worktree + branch + a minimal
+  `.env` but skips Docker/DB, and says so.
+
 ### Common failure modes (and recovery)
 
 - **Validator never passes** (3 fix attempts exhausted) → plan is wrong OR the
