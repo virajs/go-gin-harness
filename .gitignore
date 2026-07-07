@@ -17,4 +17,8 @@ Thumbs.db
 # Logs
 *.log
 
+# Worktree dev-env: registry/lock + generated per-worktree env (see scripts/worktree.sh)
+/.worktrees/
+.env
+
 golang-plugin/.github/workflows/architect-review.yml

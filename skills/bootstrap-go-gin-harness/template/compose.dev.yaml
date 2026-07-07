@@ -1,0 +1,37 @@
+# compose.dev.yaml — per-worktree Postgres for local development.
+#
+# Isolation: COMPOSE_PROJECT_NAME + PG_HOST_PORT come from the per-worktree .env, which
+# `docker compose` auto-loads from the working directory. Two worktrees therefore get
+# distinct container names, network, and data volume — they never collide.
+#
+# Driven by scripts/worktree.sh (up/down); teardown MUST use `down -v` to drop the volume:
+#   docker compose -f compose.dev.yaml --env-file .env up -d
+#   docker compose -f compose.dev.yaml --env-file .env down -v --remove-orphans
+#
+# NOTE: this is a DEV convenience only. Integration tests use testcontainers (ephemeral,
+# random ports) and do not touch this stack.
+name: ${COMPOSE_PROJECT_NAME:?set COMPOSE_PROJECT_NAME via .env (run scripts/worktree.sh env)}
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:?set POSTGRES_DB via .env}
+    ports:
+      # Bind to loopback only — never expose the dev DB off-box.
+      - "127.0.0.1:${PG_HOST_PORT:?set PG_HOST_PORT via .env}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB} -h 127.0.0.1"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+      start_period: 3s
+
+volumes:
+  pgdata:
+    name: ${COMPOSE_PROJECT_NAME}_pgdata

@@ -6,6 +6,25 @@ All notable changes to this plugin are documented here. Format follows
 
 ## [Unreleased]
 
+## [0.5.0] — 2026-07-07
+
+### Added
+
+- **Dynamic isolated dev environments** — develop features/bugs/improvements in parallel,
+  each in its own git worktree + isolated runtime (per-worktree Docker Compose Postgres,
+  deterministic collision-free ports, generated `.env`).
+  - New `dev-worktree` skill + `/worktree` command (`new`/`ls`/`env`/`up`/`down`/`rm`/`doctor`),
+    driven by a repo-local `scripts/worktree.sh`. Registry-based lowest-free-index port
+    allocation under an atomic lock; push-style safety gates (refuses a dirty worktree or an
+    unmerged branch without `--yes`). Runtime-aware — worktree-only in repos without
+    `compose.dev.yaml` (e.g. this plugin repo itself).
+  - Bootstrap template gains `compose.dev.yaml` (parameterized Postgres 16-alpine),
+    `scripts/worktree.sh`, `Makefile` `.env` include + `env`/`env-up`/`env-down` targets, and
+    a `PORT`/`DATABASE_URL`-from-env config contract (`gin-conventions.md`, `build-config.md`,
+    `CLAUDE.md`). Integration tests are untouched (they use testcontainers).
+  - `/exec-plan <topic> --isolate` provisions a worktree for the plan before running the
+    `exec-plan-build` workflow (workflow unchanged — isolation happens in the command layer).
+
 ## [0.4.0] — 2026-07-06
 
 ### Added

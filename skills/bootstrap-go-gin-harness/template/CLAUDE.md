@@ -132,6 +132,8 @@ streaming, tool use, MCP, or anything Anthropic-SDK, consult the skill rather th
 ├─ .golangci.yml                     strict linter suite (warnings = errors)
 ├─ .air.toml                         hot-reload for local dev (optional)
 ├─ sqlc.yaml                         sqlc config (schema + queries → typed Go)
+├─ compose.dev.yaml                  per-worktree local Postgres for isolated dev envs
+├─ scripts/worktree.sh               isolated dev-env lifecycle (worktree + DB + ports + .env)
 └─ .claude/                          settings.json · hooks/ · rules/ · skills/ · agents/ · workflows/
 ```
 
@@ -197,6 +199,12 @@ Full detail in `coding-standards.md` and `backend-architecture.md`; these apply 
   `docs/api/openapi.yaml`; a missing or invalid spec fails the build.
 - **Coverage gate.** `go test -cover ./...` — minimum 80% on `internal/domain` and
   `internal/app` (business logic); 60% elsewhere. Exclusions are reactive with a justification.
+- **Isolated dev environments.** Work on features/bugs in parallel via per-worktree envs:
+  `bash scripts/worktree.sh new <slug>` (or `/worktree new <slug>`) creates a git worktree +
+  branch with its own Docker Postgres, unique ports, and generated `.env`; `cd` in and
+  `make run`/`make dev`. `cmd/api` reads `PORT` + `DATABASE_URL` from the env (never hardcode).
+  Tear down with `worktree.sh rm <slug>`. `/exec-plan --isolate` sets one up automatically.
+  See `.claude/rules/build-config.md` + `.claude/rules/gin-conventions.md`.
 
 See the [README](README.md) for the bootstrap walkthrough and the harness mental model
 (influence vs. enforcement).

@@ -48,5 +48,8 @@ tmp/
 # Per-user Claude Code settings (each contributor owns their own)
 .claude/settings.local.json
 
+# Worktree dev-env registry + lock (machine-local port assignments; see scripts/worktree.sh)
+/.worktrees/
+
 # OS log junk
 *.log

@@ -33,8 +33,8 @@ The plugin ships:
   findings-verifier, eval-runner, exec-planner)
 - **5 deterministic workflows** (impl-build, architect-review, docs-standards-sync,
   eval-run, exec-plan-build)
-- **29 on-demand skills** (add-endpoint, sqlc-patterns, run-impl-loop, run-evals,
-  security-backend, …) — progressive disclosure; zero token cost until invoked
+- **30 on-demand skills** (add-endpoint, sqlc-patterns, run-impl-loop, run-evals,
+  security-backend, dev-worktree, …) — progressive disclosure; zero token cost until invoked
 - **A bootstrap skill** that scaffolds the per-repo governance (rules, hooks, Makefile,
   .golangci.yml, docs, …) into a target repository
 
@@ -405,6 +405,7 @@ work."
 | `/docs-standards-sync` | Detect drift between governance docs and the actual code |
 | `/gen-launch-json` | Generate `.vscode/launch.json` for debugging the project with Delve (one config per `cmd/` entrypoint, plus debug-test / attach) |
 | `/refresh-claude-md` | Refresh CLAUDE.md against the actual code — regenerate the derived sections (status banner, dir tree, build gates, doc links), preserve governance/vision, ask before changing any rule |
+| `/worktree <new\|ls\|rm …> [slug]` | Manage isolated per-worktree dev environments — git worktree + branch + Docker Postgres + unique ports + generated `.env` per feature/bug (bootstrapped repos); worktree-only elsewhere |
 
 ## What ships system-wide vs. per-repo
 
@@ -414,7 +415,7 @@ work."
 ├── README.md                              (this file)
 ├── agents/                                (10 .md — system-wide)
 ├── workflows/                             (5 .js — system-wide)
-├── commands/                              (10 slash commands — system-wide)
+├── commands/                              (11 slash commands — system-wide)
 └── skills/
     ├── bootstrap-go-gin-harness/
     │   ├── SKILL.md
@@ -438,7 +439,7 @@ work."
     │       ├── migrations/README.md
     │       ├── evals/README.md
     │       └── test/README.md
-    └── <29 other universal skills>/SKILL.md
+    └── <30 other universal skills>/SKILL.md
 ```
 
 ## Customization

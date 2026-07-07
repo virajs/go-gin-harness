@@ -26,6 +26,9 @@ Authoritative refs: `docs/projectStandards/build-configuration.md`.
 | `sqlc.yaml` | SQL → Go code generation config. Schema = `migrations/`; queries = `internal/infra/persistence/<feature>/*.sql`; generated code lands in `internal/infra/persistence/_sqlcgen/`. |
 | `Makefile` | Canonical entry points: `make ci` (the green-bar definition), `make test`, `make lint`, `make cover`, `make bench`, `make vuln`, `make sqlc`, `make migrate-*`, `make evals`. |
 | `.air.toml` | Hot-reload config for `make dev` (optional). |
+| `compose.dev.yaml` | Per-worktree local Postgres for isolated dev environments. Parameterized by the generated `.env` (`COMPOSE_PROJECT_NAME`, `PG_HOST_PORT`); driven by `scripts/worktree.sh` / `make env-up`. NOT used by tests (those use testcontainers). |
+| `scripts/worktree.sh` | Isolated dev-env lifecycle (`new`/`ls`/`env`/`up`/`down`/`rm`/`doctor`): a git worktree + branch per feature/bug, collision-free ports, generated `.env`, per-worktree DB. |
+| `.env` | Per-worktree dev config (gitignored, generated). `PORT` + `DATABASE_URL` + `COMPOSE_PROJECT_NAME` + Postgres creds. Consumed by the `Makefile` (`-include .env`) and `docker compose`. Never commit it. |
 | `migrations/*.sql` | goose migrations (`*.up.sql` + `*.down.sql`). Applied via `make migrate-up`. Never edit an already-applied migration; write a new one. |
 | `scripts/check-coverage.sh` | Coverage gate enforcer; called from `make cover`. |
 | `.claude/settings.json` | Permissions + hooks + MCP wiring. Per-user overrides go in `.claude/settings.local.json` (gitignored). |
@@ -124,6 +127,31 @@ govulncheck ./...
 
 Override per-run via `make cover COVER_MIN_DOMAIN=85`. A drop below the threshold fails CI.
 Excluding a file from coverage requires a justification comment in the file itself.
+
+## Isolated dev environments (worktrees)
+
+Develop several features/bugs in parallel without colliding on the working dir, branch, DB,
+or ports. Each unit of work gets its own git worktree + isolated runtime.
+
+```bash
+make env         # or: bash scripts/worktree.sh new <slug> [--type feature|bugfix|improvement]
+                 #   → ../<repo>-worktrees/<slug>, branch feat|fix|chore/<slug>,
+                 #     unique ports (API 8080+i, PG 55432+i), generated .env, DB up + migrated
+bash scripts/worktree.sh ls        # list active worktrees + ports
+cd ../<repo>-worktrees/<slug>      # then `make run` / `make dev` — reads .env automatically
+make env-up / make env-down        # start / tear down (down drops the volume) this worktree's DB
+bash scripts/worktree.sh rm <slug> # tear down + remove worktree (refuses dirty tree / unmerged branch)
+```
+
+- Ports are allocated from a per-machine registry (`.worktrees/registry.tsv`, gitignored) —
+  lowest free index, freed on teardown.
+- The DB is a per-worktree `docker compose` Postgres (`compose.dev.yaml`), isolated by
+  `COMPOSE_PROJECT_NAME`; teardown uses `down -v` so no data lingers.
+- **`cmd/api` must read `PORT` + `DATABASE_URL` from the env** — see the "Config from
+  environment" section in `.claude/rules/gin-conventions.md`. This is what lets the same code
+  run on different ports against different databases with no code change.
+- `/exec-plan <topic> --isolate` spins up a worktree for the plan automatically.
+- Integration tests are unaffected — they use testcontainers (ephemeral, random ports).
 
 ## When you change a build file
 

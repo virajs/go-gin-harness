@@ -106,7 +106,13 @@ r.Use(
 `cmd/api/main.go` must implement this pattern (the harness's bootstrap will scaffold it):
 
 ```go
-srv := &http.Server{Addr: ":8080", Handler: r, ReadHeaderTimeout: 10 * time.Second}
+// Config from environment (12-factor). PORT + DATABASE_URL come from the per-worktree .env
+// in local dev (scripts/worktree.sh) and from the platform in prod. Never hardcode them.
+port := os.Getenv("PORT")
+if port == "" {
+    port = "8080" // default when not in a worktree / no .env
+}
+srv := &http.Server{Addr: ":" + port, Handler: r, ReadHeaderTimeout: 10 * time.Second}
 go func() {
     if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
         slog.Error("server failed", "err", err)
@@ -126,6 +132,19 @@ if err := srv.Shutdown(shutdownCtx); err != nil { /* log */ }
 - `ReadHeaderTimeout` is mandatory (slowloris defense; `gosec` will warn if missing).
 - Drain order: stop accepting → in-flight finish (up to shutdown deadline) → close DB pool
   → flush OTel → exit.
+
+## Config from environment (the worktree contract)
+
+`cmd/api` reads its runtime config from the environment — never hardcode ports or DSNs:
+
+- **`PORT`** — the HTTP listen port; default `8080` when unset.
+- **`DATABASE_URL`** — the Postgres DSN; no default in prod (fail-closed if unset).
+
+This is what makes **isolated dev environments** work: `scripts/worktree.sh` generates a
+per-worktree `.env` with a unique `PORT` and a `DATABASE_URL` pointing at that worktree's
+own Postgres, and the `Makefile` exports it to `make run`/`make dev`. Two worktrees run the
+same code on different ports against different databases, no code change. Integration tests
+are unaffected — they inject their own testcontainers DSN and use `httptest` (random ports).
 
 ## Things to avoid in Gin
 

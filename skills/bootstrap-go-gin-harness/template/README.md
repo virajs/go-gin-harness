@@ -124,6 +124,30 @@ and `*.pem` files — secrets never enter context.
 
 ---
 
+## Isolated dev environments (work on several things at once)
+
+Each feature/bug/improvement can get its own git worktree + isolated runtime — a separate
+branch, a dedicated Docker Postgres, unique ports, and a generated `.env` — so parallel work
+never collides on the working dir, DB, or `:8080`.
+
+```bash
+/worktree new add-projects              # or: bash scripts/worktree.sh new add-projects
+#   → ../<repo>-worktrees/add-projects, branch feat/add-projects,
+#     Postgres on 55432+i, API on 8080+i, migrations applied, .env written
+cd ../<repo>-worktrees/add-projects
+make run                                # reads PORT + DATABASE_URL from .env automatically
+
+/worktree ls                            # list active worktrees + their ports
+/worktree rm add-projects               # tear down DB (drops volume) + remove worktree
+```
+
+Requires Docker (for the per-worktree Postgres). `cmd/api` reads `PORT` + `DATABASE_URL`
+from the environment (see the "Config from environment" contract in
+`.claude/rules/gin-conventions.md`). `/exec-plan <topic> --isolate` provisions a worktree for
+the plan automatically. Integration tests are unaffected — they use testcontainers.
+
+---
+
 ## Customization points (the dials)
 
 | Dial | Default | Where to flip |
