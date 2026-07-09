@@ -135,28 +135,30 @@ Two things — because this feature lives in both halves of the harness.
 claude plugin update go-gin-harness
 ```
 
-**2. Add the per-repo pieces.** These files live *inside your repo* and were copied in when you
-first bootstrapped, so an older repo doesn't have them yet. Heads-up: **don't** just re-run
-`/bootstrap-go-gin-harness` — it refuses to overwrite an existing repo, and forcing it would
-clobber your customized `Makefile`, `CLAUDE.md`, and rules. Add them by hand instead (source
-them from `~/.claude/plugins/go-gin-harness/skills/bootstrap-go-gin-harness/template/`):
+**2. Add the per-repo pieces** — with the upgrade script. These files live *inside your repo*
+and were copied in when you first bootstrapped, so an older repo doesn't have them. Heads-up:
+**don't** just re-run `/bootstrap-go-gin-harness` — it refuses to overwrite an existing repo,
+and forcing it would clobber your customized `Makefile`, `CLAUDE.md`, and rules. Instead run the
+idempotent, non-clobbering upgrade script from inside your repo:
 
-- **Copy in** `compose.dev.yaml` and `scripts/worktree.sh` (`chmod +x` the script).
-- **Edit the `Makefile`**: add `-include .env` + `export` near the top, and make `DB_URL` fall
-  back to `$(DATABASE_URL)`. *(These two matter most — see below.)*
-- **Edit `.gitignore`**: add `/.worktrees/` (and make sure `.env` is ignored).
-- **Make sure `cmd/api` reads `PORT` and `DATABASE_URL` from the environment** rather than
-  hardcoding `:8080` or a fixed connection string.
+```bash
+bash ~/.claude/plugins/go-gin-harness/scripts/upgrade-repo.sh . --dry-run   # preview first
+bash ~/.claude/plugins/go-gin-harness/scripts/upgrade-repo.sh .             # apply
+```
 
-Why the Makefile and `cmd/api` bits are the ones you can't skip: once `compose.dev.yaml` exists,
-the tooling will happily spin up a per-worktree database — but if the Makefile doesn't load
-`.env` and the app doesn't read `PORT`/`DATABASE_URL`, then `make run` still points at the *old*
-shared database on the *old* port. You'd get the containers but no actual isolation, silently.
+It only touches what's missing — copies `compose.dev.yaml` + `scripts/worktree.sh`, adds the
+`Makefile` lines (`-include .env` / `export`, the `DB_URL` fallback, the `env` targets) and the
+`.gitignore` entries — and it **won't run on a dirty tree**, so the result is one reviewable
+`git diff` you can undo. Run it twice and the second run does nothing.
+
+The one thing it can't do for you is edit your Go code: **`cmd/api` must read `PORT` and
+`DATABASE_URL` from the environment** rather than hardcoding `:8080` or a fixed connection
+string. The script detects whether you've done this and prints a clear reminder if not — because
+this is the bit that actually makes isolation work. If the Makefile doesn't load `.env` and the
+app ignores `PORT`/`DATABASE_URL`, you'll get the per-worktree containers but they'll be quietly
+ignored (the app still hits the old shared DB on the old port).
 
 A brand-new repo bootstrapped from v0.5.0+ gets all of this automatically — nothing to do.
-
-> This upgrade is more manual than it should be — there's no one-command "sync the per-repo
-> bits" path yet. If that'd help, it's a small thing to add.
 
 ---
 

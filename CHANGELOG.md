@@ -6,6 +6,23 @@ All notable changes to this plugin are documented here. Format follows
 
 ## [Unreleased]
 
+### Added
+
+- **`scripts/upgrade-repo.sh`** — idempotent, non-clobbering upgrade for repos bootstrapped
+  from an earlier harness version, to pick up the per-repo half of isolated dev environments
+  (v0.5.0). Copies missing files (`compose.dev.yaml`, `scripts/worktree.sh`), adds only the
+  missing `Makefile` lines (`-include .env`/`export`, `DB_URL` fallback, `env`/`env-up`/`env-down`
+  targets) and `.gitignore` entries, and preserves the repo's existing `DB_URL` default. Refuses
+  to run on a dirty git tree (so the result is one reviewable diff), supports `--dry-run` and
+  `--force`, and re-running converges (no double-apply). Never edits Go code — detects and warns
+  if `cmd/api` doesn't read `PORT`/`DATABASE_URL` from the environment. Documented in `FAQ.md`
+  and the README.
+
+### Documentation
+
+- **`FAQ.md`** — humanised Q&A covering isolated dev environments, `/add-endpoint`, ADRs vs.
+  exec-plans, upgrading an older repo, and context-window efficiency.
+
 ## [0.5.0] — 2026-07-07
 
 ### Added

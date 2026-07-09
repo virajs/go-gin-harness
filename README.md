@@ -3,7 +3,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Go Version](https://img.shields.io/badge/Go-1.24%2B-blue.svg)](https://go.dev/)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-purple.svg)](https://docs.claude.com/en/docs/claude-code/overview)
-[![Version](https://img.shields.io/badge/version-0.1.0-green.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.5.0-green.svg)](CHANGELOG.md)
 
 Production-grade Claude Code harness for **Go / Gin HTTP APIs**, packaged as a plugin so
 the operating model travels across projects.
@@ -77,7 +77,7 @@ Verify:
 
 ```bash
 claude plugin list
-# expect: go-gin-harness    0.1.0    enabled    go-gin-harness
+# expect: go-gin-harness    0.5.0    enabled    go-gin-harness
 ```
 
 Update later when the plugin changes:
@@ -90,18 +90,40 @@ claude plugin update go-gin-harness
 **Pin to a specific version** (recommended for production teams):
 
 ```bash
-claude plugin install go-gin-harness@go-gin-harness@v0.1.0
+claude plugin install go-gin-harness@go-gin-harness@v0.5.0
 ```
 
 See [CHANGELOG.md](CHANGELOG.md) for release notes.
 
 After install:
 - The 10 agents are available across all projects.
-- The 29 skills are available system-wide; auto-discovered when their description
+- The 30 skills are available system-wide; auto-discovered when their description
   matches.
 - The 5 workflows are available via the bundled slash commands (`/run-impl-loop`,
   `/exec-plan`, `/architect-review`, `/run-evals`, `/docs-standards-sync`).
 - A new slash command — `/bootstrap-go-gin-harness` — scaffolds the per-repo bits.
+
+## Upgrading an existing repo
+
+`claude plugin update` refreshes the **system-wide** half (agents, workflows, commands,
+skills). It does **not** touch the **per-repo** half — the files bootstrap copied *into* your
+repo (`Makefile`, `.claude/`, `compose.dev.yaml`, `scripts/`, docs). Re-running
+`/bootstrap-go-gin-harness` won't sync them either: it refuses to overwrite an existing repo,
+and `--force` clobbers your customizations wholesale.
+
+For a newer feature whose per-repo pieces you're missing (e.g. isolated dev environments,
+v0.5.0), use the idempotent, non-clobbering upgrade script — run it from inside the target repo:
+
+```bash
+bash ~/.claude/plugins/go-gin-harness/scripts/upgrade-repo.sh . --dry-run   # preview
+bash ~/.claude/plugins/go-gin-harness/scripts/upgrade-repo.sh .             # apply (clean tree only)
+```
+
+It copies only missing files, adds only missing `Makefile`/`.gitignore` lines (preserving your
+existing `DB_URL` default), **never edits your Go code** (it warns if `cmd/api` doesn't read
+`PORT`/`DATABASE_URL`), refuses to run on a dirty tree so the result is one reviewable `git diff`,
+and converges on re-run. Then `claude plugin update go-gin-harness` for the command/skill half.
+See [`FAQ.md`](FAQ.md) for the full walkthrough.
 
 ## Bootstrap a new project
 
@@ -306,6 +328,20 @@ Notes:
 - **Runtime-aware:** in a repo without `compose.dev.yaml` (e.g. this plugin repo, or a
   not-yet-bootstrapped clone), `/worktree new` still creates the worktree + branch + a minimal
   `.env` but skips Docker/DB, and says so.
+
+**Already have a repo on an older harness version?** The per-repo pieces (`compose.dev.yaml`,
+`scripts/worktree.sh`, the `Makefile`/`​.gitignore` lines) don't arrive with a plugin update —
+re-running bootstrap would clobber your customizations, so use the idempotent, non-clobbering
+upgrade script instead:
+
+```bash
+bash ~/.claude/plugins/go-gin-harness/scripts/upgrade-repo.sh . --dry-run   # preview
+bash ~/.claude/plugins/go-gin-harness/scripts/upgrade-repo.sh .             # apply (clean tree only)
+```
+
+It copies only what's missing, adds only missing Makefile/`.gitignore` lines, never edits your
+Go code (it warns if `cmd/api` doesn't read `PORT`/`DATABASE_URL`), and leaves a reviewable
+`git diff`. Then `claude plugin update go-gin-harness` for the command/skill half.
 
 ### Common failure modes (and recovery)
 
@@ -520,12 +556,13 @@ manually if you want to undo a bootstrap.
 
 ## See also
 
+- [`FAQ.md`](FAQ.md) — plain-English answers to common questions (isolated dev envs, ADRs, upgrading, context efficiency)
 - [`CHANGELOG.md`](CHANGELOG.md) — release notes
 - [`SECURITY.md`](SECURITY.md) — vulnerability reporting + hardening recommendations
 - [`LICENSE`](LICENSE) — MIT
 - `agents/` — the 10 sub-personas; each has its own purpose and tool surface
 - `workflows/` — the 5 deterministic orchestrations
-- `skills/` — the 29 on-demand procedures
+- `skills/` — the 30 on-demand procedures
 - `skills/bootstrap-go-gin-harness/SKILL.md` — the bootstrap procedure
 - `skills/bootstrap-go-gin-harness/template/CLAUDE.md` — the project law installed into
   every bootstrapped repo
