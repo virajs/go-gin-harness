@@ -1,0 +1,49 @@
+# plugin-validate — validate the plugin + marketplace manifests on every PR.
+#
+# `claude plugin validate` is a LOCAL manifest check (JSON schema + skill/command/agent
+# frontmatter) — no model call, no ANTHROPIC_API_KEY, so this runs on fork PRs too.
+#
+#   claude plugin validate .                          → the marketplace manifest (.claude-plugin/marketplace.json)
+#   claude plugin validate .claude-plugin/plugin.json → the plugin manifest, recursing into
+#                                                        every skill / command / agent's frontmatter
+#
+# --strict makes warnings (unknown/misspelled fields, missing metadata) fail the build too.
+# Runs on ALL PRs to main (not path-filtered) so it stays reliable as a required status check —
+# a path-filtered required check that never runs would block PRs indefinitely.
+
+name: plugin-validate
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: [main]
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Claude Code CLI
+        # Pin to a specific version for full reproducibility if you prefer, e.g.
+        #   npm install -g @anthropic-ai/claude-code@2.1.179
+        run: |
+          npm install -g @anthropic-ai/claude-code
+          claude --version
+
+      - name: Validate marketplace manifest
+        run: claude plugin validate . --strict
+
+      - name: Validate plugin manifest (recurses skills / commands / agents)
+        run: claude plugin validate .claude-plugin/plugin.json --strict

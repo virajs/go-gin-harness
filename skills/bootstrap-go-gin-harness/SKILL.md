@@ -1,7 +1,7 @@
 ---
 name: bootstrap-go-gin-harness
 description: Scaffold the per-repo Go/Gin harness governance (rules, hooks, settings.json, Makefile, .golangci.yml, sqlc.yaml, .editorconfig, .gitignore, .air.toml, .mcp.json, go.mod, CLAUDE.md, docs/, scripts/, migrations/, evals/, test/) into a target repository. Use when starting a new Go/Gin project, or to re-install the per-repo harness pieces into an existing repo.
-argument-hint: [target-dir] (defaults to the current directory)
+argument-hint: '[target-dir] (defaults to the current directory)'
 allowed-tools: Read, Glob, Grep, Edit, Write, MultiEdit, Bash
 ---
 

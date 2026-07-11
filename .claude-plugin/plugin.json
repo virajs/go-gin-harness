@@ -1,6 +1,6 @@
 {
   "name": "go-gin-harness",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "Multi-agent Claude Code harness for Go / Gin HTTP APIs — pgx + sqlc, log/slog, OpenTelemetry, testcontainers, strict golangci-lint, race detector + govulncheck gates, bundled with a bootstrap skill that scaffolds the per-repo governance.",
   "author": {
     "name": "Viraj S",
@@ -8,9 +8,6 @@
   },
   "license": "MIT",
   "homepage": "https://github.com/virajs/go-gin-harness",
-  "bugs": {
-    "url": "https://github.com/virajs/go-gin-harness/issues"
-  },
   "keywords": [
     "go",
     "golang",

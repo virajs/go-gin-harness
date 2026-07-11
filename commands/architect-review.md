@@ -1,7 +1,7 @@
 ---
 description: Run parallel architect reviewers (backend / fullstack / security) against the current diff, then adversarially verify each finding. Returns real findings with confidence + evidence.
 allowed-tools: Workflow, Bash, Read, Glob, Grep
-argument-hint: [scope] (default: backend; options: backend, fullstack, security — space-separated to combine)
+argument-hint: '[scope] (default: backend; options: backend, fullstack, security — space-separated to combine)'
 ---
 
 Run the `architect-review` workflow against the current diff.

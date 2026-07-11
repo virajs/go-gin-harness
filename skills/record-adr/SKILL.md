@@ -1,7 +1,7 @@
 ---
 name: record-adr
 description: Record an Architecture Decision Record (ADR) under docs/decisions/. Use when an architectural / cross-cutting / mid-flight decision is approved that doesn't fit inside an exec-plan's Locked Decisions table — e.g. a deferred architect-review finding, a tech-stack choice, an accepted deviation that affects future work, a "we tried X and rejected it" rationale worth preserving.
-argument-hint: "<short imperative title>" (e.g. "use sqlc over GORM")
+argument-hint: '"<short imperative title>" (e.g. "use sqlc over GORM")'
 allowed-tools: Read, Glob, Grep, Edit, Write, Bash
 ---
 

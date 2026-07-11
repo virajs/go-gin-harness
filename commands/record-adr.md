@@ -1,7 +1,7 @@
 ---
 description: Record an Architecture Decision Record (ADR) for a non-plan / cross-cutting / mid-flight decision. Writes a numbered file under docs/decisions/. Use when a decision is approved that doesn't belong in an exec-plan's Locked Decisions table.
 allowed-tools: Skill, Read, Glob, Grep, Edit, Write, Bash
-argument-hint: "<short imperative title>" (e.g. "use sqlc over GORM")
+argument-hint: '"<short imperative title>" (e.g. "use sqlc over GORM")'
 ---
 
 The user wants to record an ADR titled: **$ARGUMENTS**.

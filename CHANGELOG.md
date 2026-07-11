@@ -6,8 +6,14 @@ All notable changes to this plugin are documented here. Format follows
 
 ## [Unreleased]
 
+## [0.6.0] — 2026-07-11
+
 ### Added
 
+- **CI: `plugin-validate` GitHub Actions workflow** — runs `claude plugin validate --strict`
+  on every PR to `main`, checking both the marketplace manifest (`.`) and the plugin manifest
+  (`.claude-plugin/plugin.json`, which recurses into every skill/command/agent's frontmatter).
+  Local manifest check — no API key, so it runs on fork PRs too.
 - **`scripts/upgrade-repo.sh`** — idempotent, non-clobbering upgrade for repos bootstrapped
   from an earlier harness version, to pick up the per-repo half of isolated dev environments
   (v0.5.0). Copies missing files (`compose.dev.yaml`, `scripts/worktree.sh`), adds only the
@@ -17,6 +23,17 @@ All notable changes to this plugin are documented here. Format follows
   `--force`, and re-running converges (no double-apply). Never edits Go code — detects and warns
   if `cmd/api` doesn't read `PORT`/`DATABASE_URL` from the environment. Documented in `FAQ.md`
   and the README.
+
+### Fixed
+
+- **Broken YAML frontmatter in 4 skills/commands** (`record-adr` skill + command,
+  `bootstrap-go-gin-harness` skill, `architect-review` command) — `argument-hint` values
+  starting with `"` or `[` were misparsed by YAML, so at runtime those files loaded with
+  **empty metadata** (name/description/allowed-tools silently dropped). Quoted the values.
+  Surfaced by `claude plugin validate`.
+- **Marketplace/plugin manifests now pass `--strict`** — removed unknown fields the runtime
+  ignores (`metadata.homepage`, `metadata.repository` in marketplace.json; `bugs` in
+  plugin.json). Contact/URL info remains in the plugin entry, `plugin.json` `homepage`, and README.
 
 ### Documentation
 
